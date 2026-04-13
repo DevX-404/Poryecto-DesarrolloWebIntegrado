@@ -1,0 +1,64 @@
+package com.example.Proyecto_DWI.Model;
+
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "pacientes")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+
+public class Paciente {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank(message = "Nombre es obligatorio")
+    @Column(nullable = false, length = 100)
+    private String nombre;
+
+    @NotBlank(message = "Apellido es obligatorio")
+    @Column(nullable = false, length = 100)
+    private String apellido;
+
+    @NotBlank(message = "DNI es obligatorio")
+    @Size(min = 8, max = 8, message = "DNI debe tener exactamente 8 digitos")
+    @Column(nullable = false, unique = true, length = 8)
+    private String dni;
+
+    @Column(length = 15)
+    private String telefono;
+
+    @Email(message = "Email no tiene formato correcto")
+    @Column(unique = true)
+    private String email;
+
+    @Column(name = "fecha_nacimiento")
+    private LocalDate fechaNacimiento;
+
+    @Column(name = "fecha_registro", updatable = false)
+    private LocalDate fechaRegistro;
+
+    @PrePersist
+    public void prePersist() {
+        this.fechaRegistro = LocalDate.now();
+    }
+
+}
