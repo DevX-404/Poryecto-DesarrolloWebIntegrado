@@ -1,4 +1,4 @@
-package com.example.Proyecto_DWI;
+package com.example.Proyecto_DWI.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
