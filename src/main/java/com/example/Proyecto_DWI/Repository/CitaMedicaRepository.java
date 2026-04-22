@@ -16,6 +16,7 @@ public interface CitaMedicaRepository extends JpaRepository<CitaMedica, Long> {
 
     List<CitaMedica> findByEstado(CitaMedica.EstadoCita estado);
 
-    @Query("SELECT COUNT(c) > 0 FROM CitaMedica c WHERE c.fechaHora = :fechaHora AND c.estado != 'CANCELADA'")
-    boolean existeCitaEnHorario(LocalDateTime fechaHora);
+    @Query("SELECT COUNT(c) > 0 FROM CitaMedica c WHERE c.fechaHora = :fecha " +
+           "AND c.medico.id = :medicoId AND c.estado != 'CANCELADA'")
+    boolean existeConflictoMedico(LocalDateTime fecha, Long medicoId);
 }

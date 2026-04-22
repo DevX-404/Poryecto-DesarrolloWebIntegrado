@@ -14,17 +14,21 @@ import org.springframework.ui.Model;
 import com.example.Proyecto_DWI.Model.CitaMedica;
 import com.example.Proyecto_DWI.Service.CitaMedicaService;
 import com.example.Proyecto_DWI.Service.PacienteService;
+import com.example.Proyecto_DWI.Service.MedicoService;
 
 import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/citas")
 public class CitaMedicaController {
-    
+
     private final CitaMedicaService citaService;
     private final PacienteService pacienteService;
+    private final MedicoService medicoService;
 
-    public CitaMedicaController(CitaMedicaService citaService, PacienteService pacienteService) {
+
+    public CitaMedicaController(CitaMedicaService citaService, PacienteService pacienteService, MedicoService medicoService) {
+        this.medicoService = medicoService;
         this.citaService = citaService;
         this.pacienteService = pacienteService;
     }
@@ -45,17 +49,19 @@ public class CitaMedicaController {
 
     @PostMapping("/guardar")
     public String guardar(@RequestParam Long pacienteId,
-                          @Valid @ModelAttribute("cita") CitaMedica cita,
-                          BindingResult result,
-                          Model model,
-                          RedirectAttributes flash) {
+            @RequestParam Long medicoId, // <--- Agregar este parámetro
+            @Valid @ModelAttribute("cita") CitaMedica cita,
+            BindingResult result,
+            Model model,
+            RedirectAttributes flash) {
         if (result.hasErrors()) {
             model.addAttribute("pacientes", pacienteService.listarTodos());
-            model.addAttribute("estados", CitaMedica.EstadoCita.values());
+            model.addAttribute("medicos", medicoService.listarActivos()); // Para el select
             return "citas/formulario";
         }
         try {
-            citaService.registrar(pacienteId, cita);
+            // Ahora pasamos los 3 argumentos: paciente, medico y la cita
+            citaService.registrar(pacienteId, medicoId, cita);
             flash.addFlashAttribute("mensajeExito", "Cita registrada correctamente.");
         } catch (Exception e) {
             flash.addFlashAttribute("mensajeError", e.getMessage());
@@ -76,8 +82,8 @@ public class CitaMedicaController {
 
     @GetMapping("/estado/{id}")
     public String cambiarEstado(@PathVariable Long id,
-                                @RequestParam CitaMedica.EstadoCita nuevoEstado,
-                                RedirectAttributes flash) {
+            @RequestParam CitaMedica.EstadoCita nuevoEstado,
+            RedirectAttributes flash) {
         try {
             citaService.cambiarEstado(id, nuevoEstado);
             flash.addFlashAttribute("mensajeExito", "Estado actualizado.");
