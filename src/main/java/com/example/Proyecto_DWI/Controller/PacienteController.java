@@ -64,13 +64,10 @@ public class PacienteController {
 
     // POST /pacientes/guardar → procesa el formulario
     @PostMapping("/guardar")
-    public String guardar(@Valid @ModelAttribute("paciente") Paciente paciente,
-                          BindingResult result, // captura errores de validación
-                          Model model,
-                          RedirectAttributes flash) { // mensajes que sobreviven el redirect
+    public String guardar(@Valid @ModelAttribute("paciente") Paciente paciente, BindingResult result, Model model,
+            RedirectAttributes flash) {
         if (result.hasErrors()) {
             model.addAttribute("titulo", paciente.getId() == null ? "Nuevo Paciente" : "Editar Paciente");
-            model.addAttribute("esNuevo", paciente.getId() == null);
             return "pacientes/formulario";
         }
         try {
@@ -81,10 +78,10 @@ public class PacienteController {
                 pacienteService.actualizar(paciente.getId(), paciente);
                 flash.addFlashAttribute("mensajeExito", "Paciente actualizado correctamente.");
             }
-        } catch (IllegalArgumentException e) {
-            model.addAttribute("mensajeError", e.getMessage());
-            model.addAttribute("esNuevo", paciente.getId() == null);
-            model.addAttribute("titulo", "Error al guardar");
+        } catch (Exception e) {
+            // Aquí capturamos el error de DNI, Email o cualquier otro de base de datos
+            model.addAttribute("mensajeError", "Error: " + e.getMessage());
+            model.addAttribute("titulo", paciente.getId() == null ? "Nuevo Paciente" : "Editar Paciente");
             return "pacientes/formulario";
         }
         return "redirect:/pacientes";
@@ -94,7 +91,7 @@ public class PacienteController {
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id, RedirectAttributes flash) {
         try {
-            pacienteService.eliminar(id);
+            pacienteService.eliminarLogico(id);
             flash.addFlashAttribute("mensajeExito", "Paciente eliminado.");
         } catch (Exception e) {
             flash.addFlashAttribute("mensajeError", "No se pudo eliminar el paciente.");
@@ -102,4 +99,17 @@ public class PacienteController {
         return "redirect:/pacientes";
     }
 
+    // Endpoints para Restaurar
+    @GetMapping("/papelera")
+    public String verPapelera(Model model) {
+        model.addAttribute("pacientes", pacienteService.listarEliminados());
+        return "pacientes/papelera";
+    }
+
+    @GetMapping("/restaurar/{id}")
+    public String restaurar(@PathVariable Long id, RedirectAttributes flash) {
+        pacienteService.restaurar(id);
+        flash.addFlashAttribute("mensajeExito", "Paciente restaurado.");
+        return "redirect:/pacientes";
+    }
 }
