@@ -6,8 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.Proyecto_DWI.Model.CitaMedica;
-import com.example.Proyecto_DWI.Model.Medico;
-import com.example.Proyecto_DWI.Model.Paciente;
 import com.example.Proyecto_DWI.Repository.CitaMedicaRepository;
 
 import lombok.extern.slf4j.Slf4j;
