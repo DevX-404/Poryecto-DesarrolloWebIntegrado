@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Citas Médicas')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: sidebar('citas')}"></nav>
+
+<div class="main-content">
+    <div class="topbar d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0 fw-bold">Citas Médicas</h5>
+            <small class="text-muted">Gestión de citas y agendamiento</small>
+        </div>
+        <a href="/citas/nueva" class="btn btn-primary btn-sm px-3">
+            <i class="bi bi-calendar-plus me-1"></i>Nueva Cita
+        </a>
+    </div>
+
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="fw-600">
+                <i class="bi bi-calendar-check me-2 text-primary"></i>
+                Listado de Citas
+                <span class="badge bg-primary ms-1" th:text="${#lists.size(citas)}"></span>
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">#</th>
+                        <th>Paciente</th>
+                        <th>Fecha y Hora</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                        <th>Cambiar Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(citas)}">
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                            No hay citas registradas.
+                            <a href="/citas/nueva">Agendar la primera</a>
+                        </td>
+                    </tr>
+                    <tr th:each="c : ${citas}">
+                        <td class="ps-3 text-muted" th:text="${c.id}"></td>
+                        <td>
+                            <span th:text="${c.paciente.nombre + ' ' + c.paciente.apellido}"></span>
+                            <div class="text-muted" style="font-size:.75rem" th:text="'DNI: ' + ${c.paciente.dni}"></div>
+                        </td>
+                        <td th:text="${#temporals.format(c.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${c.motivo}"></td>
+                        <td>
+                            <span th:class="'badge ' +
+                                (${c.estado.name() == 'PENDIENTE'} ? 'bg-warning text-dark' :
+                                (${c.estado.name() == 'CONFIRMADA'} ? 'bg-success' :
+                                (${c.estado.name() == 'CANCELADA'} ? 'bg-danger' : 'bg-secondary')))"
+                                  th:text="${c.estado}">
+                            </span>
+                        </td>
+                        <td>
+                            <!-- Solo muestra opciones si la cita no está completada -->
+                            <div th:if="${c.estado.name() != 'COMPLETADA' and c.estado.name() != 'CANCELADA'}"
+                                 class="d-flex gap-1">
+                                <a th:href="@{/citas/estado/{id}(id=${c.id},nuevoEstado='CONFIRMADA')}"
+                                   class="btn btn-success btn-sm" title="Confirmar"
+                                   th:if="${c.estado.name() == 'PENDIENTE'}">
+                                    <i class="bi bi-check-lg"></i>
+                                </a>
+                                <a th:href="@{/citas/estado/{id}(id=${c.id},nuevoEstado='COMPLETADA')}"
+                                   class="btn btn-secondary btn-sm" title="Completar">
+                                    <i class="bi bi-check2-all"></i>
+                                </a>
+                            </div>
+                            <span th:if="${c.estado.name() == 'COMPLETADA' or c.estado.name() == 'CANCELADA'}"
+                                  class="text-muted" style="font-size:.75rem">—</span>
+                        </td>
+                        <td class="text-center">
+                            <a th:href="@{/citas/cancelar/{id}(id=${c.id})}"
+                               th:if="${c.estado.name() != 'CANCELADA' and c.estado.name() != 'COMPLETADA'}"
+                               class="btn btn-outline-danger btn-sm"
+                               onclick="return confirm('¿Cancelar esta cita?')">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

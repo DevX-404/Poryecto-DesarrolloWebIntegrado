@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: sidebar('dashboard')}"></nav>
+
+<div class="main-content">
+    <!-- Topbar -->
+    <div class="topbar">
+        <div>
+            <h5 class="mb-0 fw-600">Dashboard</h5>
+            <small class="text-muted" th:text="'Hoy es ' + ${#temporals.format(#temporals.createNow(), 'EEEE, d MMMM yyyy')}"></small>
+        </div>
+    </div>
+
+    <!-- Alertas -->
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#e8f4fd">
+                    <i class="bi bi-people-fill" style="color:#4361ee"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size:.78rem">Total Pacientes</div>
+                    <div class="fw-bold fs-4" th:text="${totalPacientes}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fff3e0">
+                    <i class="bi bi-calendar-check-fill" style="color:#f77f00"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size:.78rem">Total Citas</div>
+                    <div class="fw-bold fs-4" th:text="${totalCitas}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fff8e1">
+                    <i class="bi bi-clock-history" style="color:#e09f3e"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size:.78rem">Citas Pendientes</div>
+                    <div class="fw-bold fs-4" th:text="${citasPendientes}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#e8f5e9">
+                    <i class="bi bi-calendar-day-fill" style="color:#2dc653"></i>
+                </div>
+                <div>
+                    <div class="text-muted" style="font-size:.78rem">Citas Hoy</div>
+                    <div class="fw-bold fs-4" th:text="${citasHoy}">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimas citas -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-600"><i class="bi bi-clock-history me-2 text-primary"></i>Últimas Citas Registradas</span>
+            <a href="/citas/nueva" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Nueva Cita
+            </a>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">#</th>
+                        <th>Paciente</th>
+                        <th>Fecha y Hora</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(ultimasCitas)}">
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>No hay citas registradas aún.
+                        </td>
+                    </tr>
+                    <tr th:each="cita : ${ultimasCitas}">
+                        <td class="ps-3 text-muted" th:text="${cita.id}"></td>
+                        <td>
+                            <span th:text="${cita.paciente.nombre + ' ' + cita.paciente.apellido}"></span>
+                            <div class="text-muted" style="font-size:.75rem" th:text="'DNI: ' + ${cita.paciente.dni}"></div>
+                        </td>
+                        <td th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${cita.motivo}"></td>
+                        <td>
+                            <span th:class="'badge ' +
+                                (${cita.estado.name() == 'PENDIENTE'} ? 'bg-warning text-dark' :
+                                (${cita.estado.name() == 'CONFIRMADA'} ? 'bg-success' :
+                                (${cita.estado.name() == 'CANCELADA'} ? 'bg-danger' : 'bg-secondary')))"
+                                  th:text="${cita.estado}">
+                            </span>
+                        </td>
+                        <td><a th:href="@{/citas}" class="text-primary" style="font-size:.8rem">Ver →</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
