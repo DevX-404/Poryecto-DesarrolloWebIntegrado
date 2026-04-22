@@ -1,10 +1,12 @@
 package com.example.Proyecto_DWI.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.example.Proyecto_DWI.Model.CitaMedica;
+import com.example.Proyecto_DWI.Model.Medico;
 import com.example.Proyecto_DWI.Model.Paciente;
 import com.example.Proyecto_DWI.Repository.CitaMedicaRepository;
 
@@ -16,40 +18,52 @@ public class CitaMedicaService {
 
     private final CitaMedicaRepository citaRepository;
     private final PacienteService pacienteService;
+    private final MedicoService medicoService;
 
-    public CitaMedicaService(CitaMedicaRepository citaRepository, PacienteService pacienteService) {
+    public CitaMedicaService(CitaMedicaRepository citaRepository, 
+                             PacienteService pacienteService,
+                             MedicoService medicoService) {
         this.citaRepository = citaRepository;
         this.pacienteService = pacienteService;
+        this.medicoService = medicoService;
     }
 
     public List<CitaMedica> listarTodas() {
         return citaRepository.findAll();
     }
 
-    public CitaMedica buscarPorId(Long id){
-        return citaRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Cita no encontrada con ID: " + id));
+    public CitaMedica buscarPorId(Long id) {
+        return citaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cita no encontrada con ID: " + id));
     }
 
     public List<CitaMedica> listarPorPaciente(Long pacienteId) {
         return citaRepository.findByPacienteId(pacienteId);
     }
 
-    public CitaMedica registrar(Long pacienteId, CitaMedica cita) {
-        Paciente paciente = pacienteService.buscarPorId(pacienteId);
-
-        if (citaRepository.existeCitaEnHorario(cita.getFechaHora())){
-            throw new IllegalArgumentException("Ya existe una cita en el horario: " + cita.getFechaHora());
+    public CitaMedica registrar(Long pacienteId, Long medicoId, CitaMedica cita) {
+        // Validar fecha futura
+        if (cita.getFechaHora().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("No se puede agendar citas en el pasado.");
         }
-        cita.setPaciente(paciente);
-        log.info("Registrando cita para paciente ID {} en {}", pacienteId, cita.getFechaHora());
+
+        // Usar el nuevo método del repositorio
+        if (citaRepository.existeConflictoMedico(cita.getFechaHora(), medicoId)) {
+            throw new IllegalArgumentException("El médico ya tiene una cita en ese horario.");
+        }
+
+        cita.setPaciente(pacienteService.buscarPorId(pacienteId));
+        cita.setMedico(medicoService.buscarPorId(medicoId)); 
         return citaRepository.save(cita);
     }
 
     public CitaMedica cambiarEstado(Long id, CitaMedica.EstadoCita nuevoEstado) {
-        CitaMedica cita =buscarPorId(id);
+        CitaMedica cita = buscarPorId(id);
 
-        if (cita.getEstado() == CitaMedica.EstadoCita.COMPLETADA){
-            throw new IllegalStateException("No se puede cambiar el estado de una cita completada");
+        // 3. Regla: Blindaje de historia clínica
+        if (cita.getEstado() == CitaMedica.EstadoCita.COMPLETADA ||
+                cita.getEstado() == CitaMedica.EstadoCita.CANCELADA) {
+            throw new IllegalStateException("No se puede modificar una cita que ya ha finalizado o ha sido cancelada.");
         }
 
         cita.setEstado(nuevoEstado);

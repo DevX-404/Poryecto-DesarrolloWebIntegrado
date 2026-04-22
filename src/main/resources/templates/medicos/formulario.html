@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Registrar Médico')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: sidebar('medicos')}"></nav>
+
+    <div class="main-content">
+        <div class="topbar d-flex align-items-center gap-3">
+            <a href="/medicos" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i></a>
+            <div>
+                <h5 class="mb-0 fw-bold" th:text="${titulo}">Registrar Médico</h5>
+                <small class="text-muted">Ingreso de personal especializado</small>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card" style="max-width: 700px;">
+            <div class="card-header">
+                <span class="fw-600"><i class="bi bi-stethoscope me-2 text-primary"></i>Datos Profesionales</span>
+            </div>
+            <div class="card-body p-4">
+                <form th:action="@{/medicos/guardar}" th:object="${medico}" method="post" class="needs-validation" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombres <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{nombre}" class="form-control" required minlength="3">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Apellidos <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{apellido}" class="form-control" required minlength="3">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Especialidad <span class="text-danger">*</span></label>
+                            <select th:field="*{especialidad}" class="form-select" required>
+                                <option value="">— Seleccione —</option>
+                                <option value="Medicina General">Medicina General</option>
+                                <option value="Pediatría">Pediatría</option>
+                                <option value="Ginecología">Ginecología</option>
+                                <option value="Cardiología">Cardiología</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Número de Colegiatura (CMP) <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{cmp}" class="form-control" placeholder="Ej: 75421" 
+                                   required pattern="\d{5,6}" maxlength="6">
+                            <div class="invalid-feedback">El CMP debe tener entre 5 y 6 dígitos numéricos.</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Correo Institucional</label>
+                            <input type="email" th:field="*{email}" class="form-control" placeholder="medico@consultorio.com">
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-save me-1"></i>Guardar Médico
+                        </button>
+                        <a href="/medicos" class="btn btn-light px-4">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Validación nativa de Bootstrap
+        (() => {
+          'use strict'
+          const forms = document.querySelectorAll('.needs-validation')
+          Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+              if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+              }
+              form.classList.add('was-validated')
+            }, false)
+          })
+        })()
+    </script>
+</body>
+</html>
