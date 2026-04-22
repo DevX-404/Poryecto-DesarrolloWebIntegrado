@@ -27,39 +27,45 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Nombres <span class="text-danger">*</span></label>
-                            <input type="text" th:field="*{nombre}" class="form-control live-val" required
-                                minlength="3">
-                            <div class="invalid-feedback">El nombre debe tener al menos 3 letras.</div>
+                            <input type="text" th:field="*{nombre}" class="form-control" required minlength="3"
+                                th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'">
+                            <div class="invalid-feedback">El nombre es obligatorio (mín. 3 letras).</div>
                         </div>
+
                         <div class="col-md-6">
                             <label class="form-label">Apellidos <span class="text-danger">*</span></label>
-                            <input type="text" th:field="*{apellido}" class="form-control live-val" required
-                                minlength="3">
-                            <div class="invalid-feedback">El apellido debe tener al menos 3 letras.</div>
+                            <input type="text" th:field="*{apellido}" class="form-control" required minlength="3"
+                                th:classappend="${#fields.hasErrors('apellido')} ? 'is-invalid'">
+                            <div class="invalid-feedback">El apellido es obligatorio.</div>
                         </div>
+
                         <div class="col-md-6">
                             <label class="form-label">Especialidad <span class="text-danger">*</span></label>
-                            <select th:field="*{especialidad}" class="form-select live-val" required>
+                            <select th:field="*{especialidad}" class="form-select" required
+                                th:classappend="${#fields.hasErrors('especialidad')} ? 'is-invalid'">
                                 <option value="">— Seleccione —</option>
                                 <option value="Medicina General">Medicina General</option>
                                 <option value="Pediatría">Pediatría</option>
                                 <option value="Ginecología">Ginecología</option>
                                 <option value="Cardiología">Cardiología</option>
                             </select>
-                            <div class="invalid-feedback">Seleccione una especialidad.</div>
+                            <div class="invalid-feedback">Seleccione una especialidad válida.</div>
                         </div>
+
                         <div class="col-md-6">
                             <label class="form-label">Número de Colegiatura (CMP) <span
                                     class="text-danger">*</span></label>
-                            <input type="text" th:field="*{cmp}" class="form-control live-val" placeholder="Ej: 75421"
-                                required pattern="\d{5,6}" maxlength="6">
-                            <div class="invalid-feedback">El CMP debe tener entre 5 y 6 dígitos numéricos.</div>
+                            <input type="text" th:field="*{cmp}" class="form-control" required pattern="\d{5,6}"
+                                th:classappend="${#fields.hasErrors('cmp')} ? 'is-invalid'" placeholder="Ej: 75421">
+                            <div class="invalid-feedback">El CMP es obligatorio y debe ser numérico.</div>
                         </div>
+
                         <div class="col-12">
                             <label class="form-label">Correo Institucional</label>
-                            <input type="email" th:field="*{email}" class="form-control live-val"
+                            <input type="email" th:field="*{email}" class="form-control"
+                                th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
                                 placeholder="medico@consultorio.com">
-                            <div class="invalid-feedback">Ingrese un correo válido (ej@servidor.com).</div>
+                            <div class="invalid-feedback">Ingrese un formato de correo válido.</div>
                         </div>
                     </div>
 
@@ -80,13 +86,18 @@
 
             inputs.forEach(input => {
                 input.addEventListener('blur', function () {
-                    // Si el campo es válido según sus atributos (required, pattern, etc.)
-                    if (this.checkValidity()) {
-                        this.classList.remove('is-invalid');
-                        this.classList.add('is-valid');
-                    } else {
+                    // Validación: Si falla o está vacío siendo requerido, marcar rojo
+                    if (!this.checkValidity()) {
                         this.classList.remove('is-valid');
                         this.classList.add('is-invalid');
+                    } else {
+                        // Si el campo es opcional y está vacío, no ponemos marca verde
+                        if (this.value.trim() === "" && !this.hasAttribute('required')) {
+                            this.classList.remove('is-invalid', 'is-valid');
+                        } else {
+                            this.classList.remove('is-invalid');
+                            this.classList.add('is-valid');
+                        }
                     }
                 });
             });
