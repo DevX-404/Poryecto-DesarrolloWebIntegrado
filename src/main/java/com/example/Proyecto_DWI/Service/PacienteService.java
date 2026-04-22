@@ -53,6 +53,15 @@ public class PacienteService {
             }
         }
 
+        if (paciente.getEmail() == null || paciente.getEmail().isBlank()) {
+            throw new IllegalArgumentException("El registro requiere obligatoriamente un correo electrónico.");
+        }
+
+        if ((paciente.getTelefono() == null || paciente.getTelefono().isBlank()) &&
+                (paciente.getEmail() == null || paciente.getEmail().isBlank())) {
+            throw new IllegalArgumentException("Debe proporcionar al menos un medio de contacto (Teléfono o Email).");
+        }
+
         paciente.setActivo(true); // Aseguramos que inicie como activo
         log.info("Registrando nuevo paciente: {} {}", paciente.getNombre(), paciente.getApellido());
         return pacienteRepository.save(paciente);
@@ -78,7 +87,7 @@ public class PacienteService {
         }
 
         log.info("Recibida fecha de nacimiento: {}", datosNuevos.getFechaNacimiento());
-        
+
         existente.setNombre(datosNuevos.getNombre());
         existente.setApellido(datosNuevos.getApellido());
         existente.setTelefono(datosNuevos.getTelefono());

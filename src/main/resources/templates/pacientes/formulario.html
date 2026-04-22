@@ -48,22 +48,28 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Teléfono</label>
-                            <input type="text" th:field="*{telefono}" class="form-control live-val"
-                                placeholder="987654321" maxlength="9"
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                            <div class="invalid-feedback">Debe tener exactamente 9 dígitos.</div>
+                            <input type="text" th:field="*{telefono}" class="form-control" th:errorclass="is-invalid"
+                                placeholder="987654321" maxlength="9">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}"
+                                th:errors="*{telefono}"></div>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Fecha de Nacimiento</label>
-                            <input type="date" th:field="*{fechaNacimiento}" class="form-control live-val"
-                                id="fechaNac">
-                            <div class="invalid-feedback">La fecha no puede ser futura.</div>
+                            <label class="form-label">Fecha de Nacimiento <span class="text-danger">*</span></label>
+                            <input type="date" th:field="*{fechaNacimiento}" class="form-control"
+                                th:errorclass="'is-invalid'" id="fechaNac" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('fechaNacimiento')}"
+                                th:errors="*{fechaNacimiento}"></div>
+                            <div class="invalid-feedback" th:unless="${#fields.hasErrors('fechaNacimiento')}">La fecha
+                                es obligatoria y no puede ser futura.</div>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Email</label>
-                            <input type="email" th:field="*{email}" class="form-control live-val"
-                                placeholder="ejemplo@correo.com">
-                            <div class="invalid-feedback">Ingrese un correo electrónico válido.</div>
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" th:field="*{email}" class="form-control" th:errorclass="'is-invalid'"
+                                placeholder="ejemplo@correo.com" required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+                            </div>
+                            <div class="invalid-feedback" th:unless="${#fields.hasErrors('email')}">Ingrese un correo
+                                válido.</div>
                         </div>
                     </div>
 

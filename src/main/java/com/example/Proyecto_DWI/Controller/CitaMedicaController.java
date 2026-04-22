@@ -26,8 +26,8 @@ public class CitaMedicaController {
     private final PacienteService pacienteService;
     private final MedicoService medicoService;
 
-
-    public CitaMedicaController(CitaMedicaService citaService, PacienteService pacienteService, MedicoService medicoService) {
+    public CitaMedicaController(CitaMedicaService citaService, PacienteService pacienteService,
+            MedicoService medicoService) {
         this.medicoService = medicoService;
         this.citaService = citaService;
         this.pacienteService = pacienteService;
@@ -40,10 +40,14 @@ public class CitaMedicaController {
     }
 
     @GetMapping("/nueva")
-    public String mostrarFormulario(Model model) {
+    public String mostrarFormulario(@RequestParam(required = false) Long pacienteId, Model model) {
         model.addAttribute("cita", new CitaMedica());
         model.addAttribute("pacientes", pacienteService.listarTodos());
-        model.addAttribute("estados", CitaMedica.EstadoCita.values());
+        model.addAttribute("medicos", medicoService.listarActivos());
+
+        // Enviamos el ID recibido (si existe) para que el HTML lo marque como
+        // seleccionado
+        model.addAttribute("pacientePreId", pacienteId);
         return "citas/formulario";
     }
 
