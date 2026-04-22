@@ -2,6 +2,7 @@ package com.example.Proyecto_DWI.Controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.Proyecto_DWI.Model.Medico;
 import com.example.Proyecto_DWI.Service.MedicoService;
+
+import jakarta.validation.Valid;
+
 import com.example.Proyecto_DWI.Repository.MedicoRepository; // Necesario para listar inactivos
 
 @Controller
@@ -38,16 +42,33 @@ public class MedicoController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute Medico medico, RedirectAttributes flash) {
-        try {
-            medicoService.registrar(medico);
-            flash.addFlashAttribute("mensajeExito", "Médico registrado con éxito.");
-            return "redirect:/medicos";
-        } catch (Exception e) {
-            flash.addFlashAttribute("mensajeError", e.getMessage());
-            return "redirect:/medicos/nuevo";
-        }
+public String guardar(@Valid @ModelAttribute("medico") Medico medico, 
+                      BindingResult result, 
+                      Model model, 
+                      RedirectAttributes flash) {
+    
+    // 1. Si hay errores de campos vacíos (según las anotaciones @NotBlank)
+    if (result.hasErrors()) {
+        model.addAttribute("titulo", medico.getId() == null ? "Registrar Médico" : "Editar Médico");
+        // Regresamos a la vista del formulario sin redireccionar para no perder los datos
+        return "medicos/formulario"; 
     }
+
+    try {
+        medicoService.registrar(medico);
+        flash.addFlashAttribute("mensajeExito", "Médico guardado con éxito.");
+        return "redirect:/medicos";
+    } catch (IllegalArgumentException e) {
+        // Manejo específico para el error de CMP duplicado que lanza tu Service
+        result.rejectValue("cmp", "error.cmp", e.getMessage());
+        model.addAttribute("titulo", medico.getId() == null ? "Registrar Médico" : "Editar Médico");
+        return "medicos/formulario";
+    } catch (Exception e) {
+        model.addAttribute("mensajeError", "Ocurrió un error inesperado: " + e.getMessage());
+        model.addAttribute("titulo", medico.getId() == null ? "Registrar Médico" : "Editar Médico");
+        return "medicos/formulario";
+    }
+}
 
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model) {

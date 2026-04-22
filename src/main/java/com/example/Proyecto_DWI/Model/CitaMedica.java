@@ -2,6 +2,8 @@ package com.example.Proyecto_DWI.Model;
 
 import java.time.LocalDateTime;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -43,6 +45,7 @@ public class CitaMedica {
     private Paciente paciente;
 
     @NotNull(message = "La fecha y hora es obligatorias")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Column(name = "fecha_hora", nullable = false)
     private LocalDateTime fechaHora;
 

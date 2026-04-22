@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,6 +38,7 @@ public class Medico {
     @Column(unique = true, length = 10)
     private String cmp; // Colegiatura Médica
 
+    @Email(message = "El formato del email no es correcto")
     private String email;
     
     private boolean activo = true;

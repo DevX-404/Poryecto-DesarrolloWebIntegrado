@@ -16,8 +16,6 @@ import com.example.Proyecto_DWI.Service.CitaMedicaService;
 import com.example.Proyecto_DWI.Service.PacienteService;
 import com.example.Proyecto_DWI.Service.MedicoService;
 
-import jakarta.validation.Valid;
-
 @Controller
 @RequestMapping("/citas")
 public class CitaMedicaController {
@@ -52,25 +50,52 @@ public class CitaMedicaController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(@RequestParam Long pacienteId,
-            @RequestParam Long medicoId, // <--- Agregar este parámetro
-            @Valid @ModelAttribute("cita") CitaMedica cita,
+    public String guardar(@RequestParam(required = false) Long pacienteId,
+            @RequestParam(required = false) Long medicoId,
+            @ModelAttribute("cita") CitaMedica cita, // <--- SIN @Valid para evitar el conflicto
             BindingResult result,
             Model model,
             RedirectAttributes flash) {
+
+        // 1. Validaciones manuales básicas
+        if (pacienteId == null)
+            result.rejectValue("paciente", "error", "El paciente es obligatorio");
+        if (medicoId == null)
+            result.rejectValue("medico", "error", "El médico es obligatorio");
+        if (cita.getMotivo() == null || cita.getMotivo().isBlank())
+            result.rejectValue("motivo", "error", "El motivo es obligatorio");
+
+        // 2. Validación de fecha manual (Para que aparezca junto con los otros errores)
+        if (cita.getFechaHora() == null) {
+            result.rejectValue("fechaHora", "error", "La fecha y hora son obligatorias");
+        } else if (cita.getFechaHora().isBefore(java.time.LocalDateTime.now())) {
+            result.rejectValue("fechaHora", "error", "No se puede agendar citas en el pasado."); // <--- ALERTA
+                                                                                                 // ESPECÍFICA
+        }
+
+        // 3. Ahora sí, si hay CUALQUIER error (incluyendo fecha pasada), regresamos
         if (result.hasErrors()) {
-            model.addAttribute("pacientes", pacienteService.listarTodos());
-            model.addAttribute("medicos", medicoService.listarActivos()); // Para el select
+            prepararModeloFormulario(model, pacienteId, medicoId);
             return "citas/formulario";
         }
+
         try {
-            // Ahora pasamos los 3 argumentos: paciente, medico y la cita
             citaService.registrar(pacienteId, medicoId, cita);
             flash.addFlashAttribute("mensajeExito", "Cita registrada correctamente.");
-        } catch (Exception e) {
-            flash.addFlashAttribute("mensajeError", e.getMessage());
+            return "redirect:/citas";
+        } catch (IllegalArgumentException e) {
+            // Otros errores de lógica (ej: médico ocupado)
+            result.rejectValue("medico", "error", e.getMessage());
+            prepararModeloFormulario(model, pacienteId, medicoId);
+            return "citas/formulario";
         }
-        return "redirect:/citas";
+    }
+
+    private void prepararModeloFormulario(Model model, Long pId, Long mId) {
+        model.addAttribute("pacientes", pacienteService.listarTodos());
+        model.addAttribute("medicos", medicoService.listarActivos());
+        model.addAttribute("pacientePreId", pId); // Retiene el paciente seleccionado
+        model.addAttribute("medicoPreId", mId); // Retiene el médico seleccionado
     }
 
     @GetMapping("/cancelar/{id}")
