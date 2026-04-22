@@ -1,89 +1,132 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{fragments/layout :: head(${titulo})}"></head>
+
 <body>
 
-<nav th:replace="~{fragments/layout :: sidebar('pacientes')}"></nav>
+    <nav th:replace="~{fragments/layout :: sidebar('pacientes')}"></nav>
 
-<div class="main-content">
-    <div class="topbar d-flex align-items-center gap-3">
-        <a href="/pacientes" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i></a>
-        <div>
-            <h5 class="mb-0 fw-bold" th:text="${titulo}">Paciente</h5>
-            <small class="text-muted">Complete todos los campos requeridos</small>
+    <div class="main-content">
+        <div class="topbar d-flex align-items-center gap-3">
+            <a href="/pacientes" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i></a>
+            <div>
+                <h5 class="mb-0 fw-bold" th:text="${titulo}">Paciente</h5>
+                <small class="text-muted">Gestión de datos maestros</small>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card" style="max-width: 700px;">
+            <div class="card-header">
+                <span class="fw-600"><i class="bi bi-person-vcard me-2 text-primary"></i>Datos del Paciente</span>
+            </div>
+            <div class="card-body p-4">
+                <form id="pacienteForm" th:action="@{/pacientes/guardar}" th:object="${paciente}" method="post"
+                    class="needs-validation" novalidate>
+                    <input type="hidden" th:field="*{id}">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{nombre}" class="form-control live-val" placeholder="Ej: Juan"
+                                required minlength="2">
+                            <div class="invalid-feedback">El nombre es obligatorio (mín. 2 letras).</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Apellido <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{apellido}" class="form-control live-val"
+                                placeholder="Ej: Pérez" required minlength="2">
+                            <div class="invalid-feedback">El apellido es obligatorio.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">DNI <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{dni}" class="form-control live-val" placeholder="12345678"
+                                required pattern="\d{8}" maxlength="8">
+                            <div class="invalid-feedback">Debe contener exactamente 8 dígitos numéricos.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" th:field="*{telefono}" class="form-control live-val"
+                                placeholder="987654321" maxlength="9"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            <div class="invalid-feedback">Debe tener exactamente 9 dígitos.</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Fecha de Nacimiento</label>
+                            <input type="date" th:field="*{fechaNacimiento}" class="form-control live-val"
+                                id="fechaNac">
+                            <div class="invalid-feedback">La fecha no puede ser futura.</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Email</label>
+                            <input type="email" th:field="*{email}" class="form-control live-val"
+                                placeholder="ejemplo@correo.com">
+                            <div class="invalid-feedback">Ingrese un correo electrónico válido.</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-floppy me-1"></i>
+                            <span th:text="${esNuevo} ? 'Registrar Paciente' : 'Guardar Cambios'"></span>
+                        </button>
+                        <a href="/pacientes" class="btn btn-light px-4">Cancelar</a>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <div th:replace="~{fragments/layout :: alerts}"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll('.live-val');
 
-    <div class="card" style="max-width: 700px;">
-        <div class="card-header">
-            <span class="fw-600">
-                <i class="bi bi-person-vcard me-2 text-primary"></i>
-                Datos del Paciente
-            </span>
-        </div>
-        <div class="card-body p-4">
-            <!-- th:action: URL dinámica | th:object: objeto que llena el form -->
-            <form th:action="@{/pacientes/guardar}" th:object="${paciente}" method="post">
-                <!-- Campo oculto para el ID (necesario en edición) -->
-                <input type="hidden" th:field="*{id}">
+            inputs.forEach(input => {
+                input.addEventListener('blur', function () {
+                    validarCampo(this);
+                });
+            });
 
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Nombre <span class="text-danger">*</span></label>
-                        <!-- th:field vincula el input con el campo del objeto -->
-                        <input type="text" th:field="*{nombre}" class="form-control"
-                               th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'"
-                               placeholder="Ej: Juan">
-                        <!-- Muestra el error de validación si existe -->
-                        <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}"
-                             th:errors="*{nombre}"></div>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Apellido <span class="text-danger">*</span></label>
-                        <input type="text" th:field="*{apellido}" class="form-control"
-                               th:classappend="${#fields.hasErrors('apellido')} ? 'is-invalid'"
-                               placeholder="Ej: Pérez">
-                        <div class="invalid-feedback" th:errors="*{apellido}"></div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">DNI <span class="text-danger">*</span></label>
-                        <input type="text" th:field="*{dni}" class="form-control"
-                               th:classappend="${#fields.hasErrors('dni')} ? 'is-invalid'"
-                               placeholder="12345678" maxlength="8">
-                        <div class="invalid-feedback" th:errors="*{dni}"></div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Teléfono</label>
-                        <input type="text" th:field="*{telefono}" class="form-control"
-                               placeholder="987654321">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Fecha de Nacimiento</label>
-                        <input type="date" th:field="*{fechaNacimiento}" class="form-control">
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Email</label>
-                        <input type="email" th:field="*{email}" class="form-control"
-                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
-                               placeholder="ejemplo@correo.com">
-                        <div class="invalid-feedback" th:errors="*{email}"></div>
-                    </div>
-                </div>
+            function validarCampo(input) {
+                // 1. Si el campo es opcional y está vacío, limpiamos clases y salimos
+                if (!input.hasAttribute('required') && input.value.trim() === "") {
+                    input.classList.remove('is-invalid', 'is-valid');
+                    return;
+                }
 
-                <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-floppy me-1"></i>
-                        <span th:text="${esNuevo} ? 'Registrar Paciente' : 'Guardar Cambios'"></span>
-                    </button>
-                    <a href="/pacientes" class="btn btn-light px-4">Cancelar</a>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+                // 2. Validación especial para Teléfono (debe tener exactamente 9 si se escribe algo)
+                if (input.name === "telefono" && input.value.length > 0) {
+                    if (input.value.length !== 9) {
+                        input.setCustomValidity('Debe tener 9 dígitos');
+                    } else {
+                        input.setCustomValidity('');
+                    }
+                }
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+                // 3. Validación especial para fecha de nacimiento (no futura)
+                if (input.id === 'fechaNac' && input.value) {
+                    const hoy = new Date().toISOString().split('T')[0];
+                    if (input.value > hoy) {
+                        input.setCustomValidity('Fecha futura');
+                    } else {
+                        input.setCustomValidity('');
+                    }
+                }
+
+                // 4. Aplicar clases visuales de Bootstrap
+                if (input.checkValidity()) {
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                } else {
+                    input.classList.remove('is-valid');
+                    input.classList.add('is-invalid');
+                }
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

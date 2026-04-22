@@ -19,4 +19,10 @@ public interface PacienteRepository extends JpaRepository<Paciente, Long> {
 
     boolean existsByDni(String dni);
 
+    List<Paciente> findByActivoTrue();
+    
+    List<Paciente> findByActivoFalse();
+
+    List<Paciente> findByActivoTrueAndNombreContainingOrActivoTrueAndApellidoContaining(String nombre, String apellido);
+
 }
