@@ -27,8 +27,6 @@ public class PacienteController {
         this.pacienteService = pacienteService;
     }
 
-    // GET /pacientes → muestra la lista
-    // Model es como una "mochila" donde metes datos para que la plantilla los use
     @GetMapping
     public String listar(@RequestParam(required = false) String nombre, Model model) {
         if (nombre != null && !nombre.isBlank()) {
@@ -37,19 +35,17 @@ public class PacienteController {
         } else {
             model.addAttribute("pacientes", pacienteService.listarTodos());
         }
-        return "pacientes/lista"; // → busca templates/pacientes/lista.html
+        return "pacientes/lista"; 
     }
 
-    // GET /pacientes/nuevo → muestra el formulario vacío
     @GetMapping("/nuevo")
     public String mostrarFormularioNuevo(Model model) {
-        model.addAttribute("paciente", new Paciente()); // objeto vacío para el form
+        model.addAttribute("paciente", new Paciente()); 
         model.addAttribute("titulo", "Nuevo Paciente");
         model.addAttribute("esNuevo", true);
         return "pacientes/formulario";
     }
 
-    // GET /pacientes/editar/1 → muestra el formulario con datos del paciente
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditar(@PathVariable Long id, Model model) {
         try {
@@ -62,7 +58,6 @@ public class PacienteController {
         return "pacientes/formulario";
     }
 
-    // POST /pacientes/guardar → procesa el formulario
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("paciente") Paciente paciente, BindingResult result, Model model,
             RedirectAttributes flash) {
@@ -79,7 +74,6 @@ public class PacienteController {
                 flash.addFlashAttribute("mensajeExito", "Paciente actualizado correctamente.");
             }
         } catch (Exception e) {
-            // Aquí capturamos el error de DNI, Email o cualquier otro de base de datos
             model.addAttribute("mensajeError", "Error: " + e.getMessage());
             model.addAttribute("titulo", paciente.getId() == null ? "Nuevo Paciente" : "Editar Paciente");
             return "pacientes/formulario";
@@ -87,7 +81,6 @@ public class PacienteController {
         return "redirect:/pacientes";
     }
 
-    // GET /pacientes/eliminar/1
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id, RedirectAttributes flash) {
         try {
@@ -99,7 +92,6 @@ public class PacienteController {
         return "redirect:/pacientes";
     }
 
-    // Endpoints para Restaurar
     @GetMapping("/papelera")
     public String verPapelera(Model model) {
         model.addAttribute("pacientes", pacienteService.listarEliminados());

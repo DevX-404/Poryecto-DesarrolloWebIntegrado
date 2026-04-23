@@ -15,7 +15,7 @@ import com.example.Proyecto_DWI.Service.MedicoService;
 
 import jakarta.validation.Valid;
 
-import com.example.Proyecto_DWI.Repository.MedicoRepository; // Necesario para listar inactivos
+import com.example.Proyecto_DWI.Repository.MedicoRepository; 
 
 @Controller
 @RequestMapping("/medicos")
@@ -31,7 +31,7 @@ public class MedicoController {
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("medicos", medicoService.listarActivos());
-        return "medicos/lista"; // Debes crear esta vista similar a pacientes/lista
+        return "medicos/lista"; 
     }
 
     @GetMapping("/nuevo")
@@ -47,7 +47,7 @@ public String guardar(@Valid @ModelAttribute("medico") Medico medico,
                       Model model, 
                       RedirectAttributes flash) {
     
-    // 1. Si hay errores de campos vacíos (según las anotaciones @NotBlank)
+    // 1. Si hay errores de campos vacíos 
     if (result.hasErrors()) {
         model.addAttribute("titulo", medico.getId() == null ? "Registrar Médico" : "Editar Médico");
         // Regresamos a la vista del formulario sin redireccionar para no perder los datos
@@ -86,7 +86,7 @@ public String guardar(@Valid @ModelAttribute("medico") Medico medico,
 
     @GetMapping("/papelera")
     public String verInactivos(Model model) {
-        model.addAttribute("medicos", medicoRepository.findByActivoFalse()); // Necesitas crear este método en el repo
+        model.addAttribute("medicos", medicoRepository.findByActivoFalse()); 
         return "medicos/papelera";
     }
 }

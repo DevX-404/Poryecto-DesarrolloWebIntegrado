@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.Proyecto_DWI.Service.CitaMedicaService;
 import com.example.Proyecto_DWI.Service.PacienteService;
-import com.example.Proyecto_DWI.Service.MedicoService; // <--- Nuevo
+import com.example.Proyecto_DWI.Service.MedicoService; 
 
 import org.springframework.ui.Model;
 
@@ -14,11 +14,11 @@ public class DashboardController {
 
     private final PacienteService pacienteService;
     private final CitaMedicaService citaService;
-    private final MedicoService medicoService; // <--- Nuevo
+    private final MedicoService medicoService; 
 
 
 
-    public DashboardController(PacienteService pacienteService, CitaMedicaService citaService, MedicoService medicoService) { // <--- Nuevo
+    public DashboardController(PacienteService pacienteService, CitaMedicaService citaService, MedicoService medicoService) { 
         this.medicoService = medicoService;
         this.pacienteService = pacienteService;
         this.citaService = citaService;
@@ -28,7 +28,7 @@ public class DashboardController {
     public String dashboard(Model model) {
         // Estadísticas generales
         model.addAttribute("totalPacientes", pacienteService.listarTodos().size());
-        model.addAttribute("totalMedicos", medicoService.listarActivos().size()); // <--- Nuevo
+        model.addAttribute("totalMedicos", medicoService.listarActivos().size()); 
         model.addAttribute("totalCitas", citaService.listarTodas().size());
 
         // Filtros de citas para hoy

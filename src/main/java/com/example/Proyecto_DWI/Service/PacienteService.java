@@ -46,7 +46,7 @@ public class PacienteService {
             throw new IllegalArgumentException("Ya existe un paciente con el DNI: " + paciente.getDni());
         }
 
-        // 2. Verificación de Email (Esto evitará el error 500 que tuviste)
+        // 2. Verificación de Email 
         if (paciente.getEmail() != null && !paciente.getEmail().isBlank()) {
             if (pacienteRepository.findByEmail(paciente.getEmail()).isPresent()) {
                 throw new IllegalArgumentException("El correo electrónico ya está registrado por otro paciente.");
@@ -62,7 +62,7 @@ public class PacienteService {
             throw new IllegalArgumentException("Debe proporcionar al menos un medio de contacto (Teléfono o Email).");
         }
 
-        paciente.setActivo(true); // Aseguramos que inicie como activo
+        paciente.setActivo(true); 
         log.info("Registrando nuevo paciente: {} {}", paciente.getNombre(), paciente.getApellido());
         return pacienteRepository.save(paciente);
     }
@@ -70,14 +70,12 @@ public class PacienteService {
     public Paciente actualizar(Long id, Paciente datosNuevos) {
         Paciente existente = buscarPorId(id);
 
-        // Validar que el nuevo DNI no lo tenga otro paciente
         pacienteRepository.findByDni(datosNuevos.getDni())
                 .ifPresent(p -> {
                     if (!p.getId().equals(id))
                         throw new IllegalArgumentException("El DNI ya pertenece a otro registro.");
                 });
 
-        // Validar que el nuevo Email no lo tenga otro paciente
         if (datosNuevos.getEmail() != null && !datosNuevos.getEmail().isBlank()) {
             pacienteRepository.findByEmail(datosNuevos.getEmail())
                     .ifPresent(p -> {
@@ -99,12 +97,11 @@ public class PacienteService {
 
     public void eliminarLogico(Long id) {
         Paciente p = buscarPorId(id);
-        p.setActivo(false); // No borramos, desactivamos (Integridad referencial)
+        p.setActivo(false); 
         pacienteRepository.save(p);
         log.info("Paciente con ID {} desactivado", id);
     }
 
-    // Métodos para la Restauración
     public List<Paciente> listarEliminados() {
         return pacienteRepository.findByActivoFalse();
     }
