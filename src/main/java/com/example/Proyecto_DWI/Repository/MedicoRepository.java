@@ -10,11 +10,10 @@ import com.example.Proyecto_DWI.Model.Medico;
 
 @Repository
 public interface MedicoRepository extends JpaRepository<Medico, Long> {
-    // Para listar solo doctores disponibles en el consultorio [cite: 182]
+
     List<Medico> findByActivoTrue();
     List<Medico> findByActivoFalse();
     
-    // El CMP es el "DNI" del médico, debe ser único [cite: 112]
     Optional<Medico> findByCmp(String cmp);
     
     boolean existsByCmp(String cmp);

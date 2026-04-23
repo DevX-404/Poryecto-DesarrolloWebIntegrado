@@ -37,7 +37,7 @@ class CitaMedicaServiceTest {
     private PacienteService pacienteService;
 
     @Mock
-    private MedicoService medicoService; // <--- Nuevo Mock para Médico 
+    private MedicoService medicoService; 
 
     @InjectMocks
     private CitaMedicaService citaService;
@@ -55,7 +55,7 @@ class CitaMedicaServiceTest {
                 .id(1L).nombre("Carlos").apellido("Gomez").especialidad("Cardiología").cmp("CMP12345").build();
 
         citaValida = CitaMedica.builder()
-                .fechaHora(LocalDateTime.now().plusDays(1)) // Fecha futura [cite: 116]
+                .fechaHora(LocalDateTime.now().plusDays(1)) 
                 .motivo("Chequeo preventivo")
                 .estado(CitaMedica.EstadoCita.PENDIENTE)
                 .build();
@@ -67,11 +67,11 @@ class CitaMedicaServiceTest {
         // ARRANGE
         when(pacienteService.buscarPorId(1L)).thenReturn(pacienteValido);
         when(medicoService.buscarPorId(1L)).thenReturn(medicoValido);
-        when(citaRepository.existeConflictoMedico(any(), eq(1L))).thenReturn(false); // 
+        when(citaRepository.existeConflictoMedico(any(), eq(1L))).thenReturn(false); 
         when(citaRepository.save(any())).thenReturn(citaValida);
 
         // ACT
-        CitaMedica resultado = citaService.registrar(1L, 1L, citaValida); // 3 argumentos ahora [cite: 143, 149]
+        CitaMedica resultado = citaService.registrar(1L, 1L, citaValida); 
 
         // ASSERT
         assertThat(resultado).isNotNull();
@@ -87,7 +87,7 @@ class CitaMedicaServiceTest {
         // ACT & ASSERT
         assertThatThrownBy(() -> citaService.registrar(1L, 1L, citaValida))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("ya tiene una cita"); // [cite: 118]
+                .hasMessageContaining("ya tiene una cita"); 
 
         verify(citaRepository, never()).save(any());
     }
@@ -103,7 +103,7 @@ class CitaMedicaServiceTest {
         // ACT & ASSERT
         assertThatThrownBy(() -> citaService.registrar(1L, 1L, citaPasada))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("pasado"); // Validación profesional 
+                .hasMessageContaining("pasado");
 
         verify(citaRepository, never()).save(any());
     }
@@ -122,6 +122,6 @@ class CitaMedicaServiceTest {
         // ACT & ASSERT: Intentar cancelar una cita completada debe fallar
         assertThatThrownBy(() -> citaService.cambiarEstado(10L, CitaMedica.EstadoCita.CANCELADA))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("finalizado o ha sido cancelada"); // Protección de historia clínica [cite: 106, 117]
+                .hasMessageContaining("finalizado o ha sido cancelada"); 
     }
 }

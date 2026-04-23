@@ -22,7 +22,6 @@ public class MedicoService {
     }
 
     public Medico registrar(Medico medico) {
-        // Validación de profesionalismo: CMP único [cite: 112, 203]
         if (medicoRepository.existsByCmp(medico.getCmp())) {
             throw new IllegalArgumentException("Ya existe un médico registrado con el CMP: " + medico.getCmp());
         }
@@ -37,7 +36,7 @@ public class MedicoService {
 
     public void eliminarLogico(Long id) {
         Medico medico = buscarPorId(id);
-        medico.setActivo(false); // No borramos, desactivamos para proteger citas previas [cite: 179, 180]
+        medico.setActivo(false); 
         medicoRepository.save(medico);
     }
 }

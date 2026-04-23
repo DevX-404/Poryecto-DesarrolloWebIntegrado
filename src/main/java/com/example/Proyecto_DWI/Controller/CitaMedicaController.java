@@ -43,8 +43,6 @@ public class CitaMedicaController {
         model.addAttribute("pacientes", pacienteService.listarTodos());
         model.addAttribute("medicos", medicoService.listarActivos());
 
-        // Enviamos el ID recibido (si existe) para que el HTML lo marque como
-        // seleccionado
         model.addAttribute("pacientePreId", pacienteId);
         return "citas/formulario";
     }
@@ -52,7 +50,7 @@ public class CitaMedicaController {
     @PostMapping("/guardar")
     public String guardar(@RequestParam(required = false) Long pacienteId,
             @RequestParam(required = false) Long medicoId,
-            @ModelAttribute("cita") CitaMedica cita, // <--- SIN @Valid para evitar el conflicto
+            @ModelAttribute("cita") CitaMedica cita, 
             BindingResult result,
             Model model,
             RedirectAttributes flash) {
@@ -65,15 +63,13 @@ public class CitaMedicaController {
         if (cita.getMotivo() == null || cita.getMotivo().isBlank())
             result.rejectValue("motivo", "error", "El motivo es obligatorio");
 
-        // 2. Validación de fecha manual (Para que aparezca junto con los otros errores)
+        // 2. Validación de fecha manual 
         if (cita.getFechaHora() == null) {
             result.rejectValue("fechaHora", "error", "La fecha y hora son obligatorias");
         } else if (cita.getFechaHora().isBefore(java.time.LocalDateTime.now())) {
-            result.rejectValue("fechaHora", "error", "No se puede agendar citas en el pasado."); // <--- ALERTA
-                                                                                                 // ESPECÍFICA
+            result.rejectValue("fechaHora", "error", "No se puede agendar citas en el pasado."); 
         }
 
-        // 3. Ahora sí, si hay CUALQUIER error (incluyendo fecha pasada), regresamos
         if (result.hasErrors()) {
             prepararModeloFormulario(model, pacienteId, medicoId);
             return "citas/formulario";
@@ -84,7 +80,6 @@ public class CitaMedicaController {
             flash.addFlashAttribute("mensajeExito", "Cita registrada correctamente.");
             return "redirect:/citas";
         } catch (IllegalArgumentException e) {
-            // Otros errores de lógica (ej: médico ocupado)
             result.rejectValue("medico", "error", e.getMessage());
             prepararModeloFormulario(model, pacienteId, medicoId);
             return "citas/formulario";
@@ -94,8 +89,8 @@ public class CitaMedicaController {
     private void prepararModeloFormulario(Model model, Long pId, Long mId) {
         model.addAttribute("pacientes", pacienteService.listarTodos());
         model.addAttribute("medicos", medicoService.listarActivos());
-        model.addAttribute("pacientePreId", pId); // Retiene el paciente seleccionado
-        model.addAttribute("medicoPreId", mId); // Retiene el médico seleccionado
+        model.addAttribute("pacientePreId", pId); 
+        model.addAttribute("medicoPreId", mId); 
     }
 
     @GetMapping("/cancelar/{id}")

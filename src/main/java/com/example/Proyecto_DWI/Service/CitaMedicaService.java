@@ -45,7 +45,6 @@ public class CitaMedicaService {
             throw new IllegalArgumentException("No se puede agendar citas en el pasado.");
         }
 
-        // Usar el nuevo método del repositorio
         if (citaRepository.existeConflictoMedico(cita.getFechaHora(), medicoId)) {
             throw new IllegalArgumentException("El médico ya tiene una cita en ese horario.");
         }
@@ -58,7 +57,6 @@ public class CitaMedicaService {
     public CitaMedica cambiarEstado(Long id, CitaMedica.EstadoCita nuevoEstado) {
         CitaMedica cita = buscarPorId(id);
 
-        // 3. Regla: Blindaje de historia clínica
         if (cita.getEstado() == CitaMedica.EstadoCita.COMPLETADA ||
                 cita.getEstado() == CitaMedica.EstadoCita.CANCELADA) {
             throw new IllegalStateException("No se puede modificar una cita que ya ha finalizado o ha sido cancelada.");
